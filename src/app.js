@@ -1,12 +1,13 @@
 require("dotenv").config();
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const app = express(); //instance of express like new application
 const PORT = process.env.PORT || 3000;
 
 const connectDB = require("./config/database");
 
 app.use(express.json()); //middleware to parse json request body it parse all the request body to json
-
+app.use(cookieParser()); //middleware to parse cookies from incoming requests
 // Import routes
 const routes = require("./routes/routes");
 app.use("/", routes);
