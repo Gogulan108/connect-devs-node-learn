@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { userAuthenticated } = require("../middlewares/auth");
+
 const User = require("../models/userModel");
+const validateUserInput = require("../middlewares/validateUserInput");
 
 // Home route
 router.get("/", (req, res) => {
@@ -45,23 +47,28 @@ router.delete("/user", userAuthenticated, async (req, res) => {
 });
 
 // Update user by id
-router.patch("/user", userAuthenticated, async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const updateData = req.body.updatedData;
-    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
-      returnDocument: "after",
-    });
-    if (!updatedUser) {
-      return res.status(404).json({ message: "User not found" });
+router.patch(
+  "/user",
+  userAuthenticated,
+  validateUserInput,
+  async (req, res) => {
+    try {
+      const userId = req.user._id;
+      const updateData = req.body.updatedData;
+      const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+        returnDocument: "after",
+      });
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res
+        .status(200)
+        .json({ message: "User updated successfully", user: updatedUser });
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(400).send("Something went wrong");
     }
-    res
-      .status(200)
-      .json({ message: "User updated successfully", user: updatedUser });
-  } catch (error) {
-    console.error("Error updating user:", error);
-    res.status(400).send("Something went wrong");
   }
-});
+);
 
 module.exports = router;
